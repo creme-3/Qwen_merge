@@ -1,0 +1,2 @@
+﻿model,task,model_path,num_fewshot,max_new_toks,do_sample,temperature,top_p,"pass@1,create_test","pass@1_stderr,create_test",sample_len
+ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p75,humaneval,merge_outputs/ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p75,0,256,False,0.0,1.0,0.3902439024390244,0.038207826828680895,164

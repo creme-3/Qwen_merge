@@ -1,0 +1,4 @@
+﻿model,task,model_path,num_fewshot,max_new_toks,do_sample,temperature,top_p,"exact_match,strict-match","exact_match,flexible-extract","acc,none","acc_stderr,none","exact_match_stderr,flexible-extract","exact_match_stderr,strict-match","pass@1,create_test","pass@1_stderr,create_test",sample_len
+slerp_math_to_coder_mlp_layers_9_18_t_0p05,gsm8k,merge_outputs/slerp_math_to_coder_mlp_layers_9_18_t_0p05,5,256,False,0.0,1.0,0.7308567096285065,0.731614859742229,,,0.012205702688013664,0.012216595457292733,,,1319
+slerp_math_to_coder_mlp_layers_9_18_t_0p05,mmlu,merge_outputs/slerp_math_to_coder_mlp_layers_9_18_t_0p05,5,256,False,0.0,1.0,,,0.4346246973365617,0.004119624806754369,,,,,14042
+slerp_math_to_coder_mlp_layers_9_18_t_0p05,humaneval,merge_outputs/slerp_math_to_coder_mlp_layers_9_18_t_0p05,0,256,False,0.0,1.0,,,,,,,0.3353658536585366,0.036979151634037165,164

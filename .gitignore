@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Local editor/config
+.vscode/
+.agents/
+.codex/
+
+# Temporary files
+.tmp_recipes/
+*.tmp
+
+# Large local model artifacts
+models/
+merge_outputs/
+
+# Evaluation artifacts that can be regenerated
+eval_results/*.log
+eval_results/*.json
+eval_results/qwen25_1p5b_local_eval.log
+
+# Scratch output
+outputs/**/write_probe.txt
+

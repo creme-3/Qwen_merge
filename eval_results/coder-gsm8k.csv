@@ -1,0 +1,2 @@
+﻿model,task,model_path,num_fewshot,max_new_toks,do_sample,temperature,top_p,"exact_match,strict-match","exact_match,flexible-extract","exact_match_stderr,flexible-extract","exact_match_stderr,strict-match",sample_len
+coder,gsm8k,/mnt/d/Qwen_merge/models/Qwen2.5-1.5B-coder,5,256,False,0.0,1.0,0.576194086429113,0.579226686884003,0.013598489497182835,0.013611632008810366,1319

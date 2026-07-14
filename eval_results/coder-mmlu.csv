@@ -1,0 +1,2 @@
+﻿model,task,model_path,num_fewshot,max_new_toks,do_sample,temperature,top_p,"acc,none","acc_stderr,none",sample_len
+coder,mmlu,/mnt/d/Qwen_merge/models/Qwen2.5-1.5B-coder,5,256,False,0.0,1.0,0.5373878364905285,0.004041536262255379,14042

@@ -1,0 +1,2 @@
+﻿model,task,model_path,num_fewshot,max_new_toks,do_sample,temperature,top_p,"pass@1,create_test","pass@1_stderr,create_test",sample_len
+coder,humaneval,/mnt/d/Qwen_merge/models/Qwen2.5-1.5B-coder,0,256,False,0.0,1.0,0.4024390243902439,0.03841026959095089,164

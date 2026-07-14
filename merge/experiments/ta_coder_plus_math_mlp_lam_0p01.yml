@@ -1,0 +1,19 @@
+merge_method: task_arithmetic
+
+base_model: /mnt/d/Qwen_merge/models/Qwen2.5-1.5B-coder
+
+dtype: float32
+out_dtype: float16
+tokenizer_source: base
+
+parameters:
+  normalize: true
+  lambda: 0.01
+
+models:
+  - model: /mnt/d/Qwen_merge/models/Qwen2.5-1.5B-math
+    parameters:
+      weight:
+        - filter: "mlp."
+          value: 1.0
+        - value: 0.0

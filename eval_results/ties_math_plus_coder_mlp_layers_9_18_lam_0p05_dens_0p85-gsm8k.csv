@@ -1,0 +1,2 @@
+﻿model,task,model_path,num_fewshot,max_new_toks,do_sample,temperature,top_p,"exact_match,strict-match","exact_match,flexible-extract","exact_match_stderr,flexible-extract","exact_match_stderr,strict-match",sample_len
+ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p85,gsm8k,merge_outputs/ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p85,5,256,False,0.0,1.0,0.7285822592873389,0.7293404094010614,0.012238245006183424,0.012249002026150596,1319

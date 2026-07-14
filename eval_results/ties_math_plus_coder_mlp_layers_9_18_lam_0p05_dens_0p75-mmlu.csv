@@ -1,0 +1,2 @@
+﻿model,task,model_path,num_fewshot,max_new_toks,do_sample,temperature,top_p,"acc,none","acc_stderr,none",sample_len
+ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p75,mmlu,merge_outputs/ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p75,5,256,False,0.0,1.0,0.4318473151972653,0.004122484097174542,14042

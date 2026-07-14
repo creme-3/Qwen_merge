@@ -1,0 +1,37 @@
+slices:
+  - sources:
+      - model: /mnt/d/Qwen_merge/models/Qwen2.5-1.5B-math
+        layer_range: [0, 28]
+      - model: /mnt/d/Qwen_merge/models/Qwen2.5-1.5B-coder
+        layer_range: [0, 28]
+
+merge_method: slerp
+base_model: /mnt/d/Qwen_merge/models/Qwen2.5-1.5B-math
+
+dtype: float32
+out_dtype: float16
+tokenizer_source: base
+
+parameters:
+  t:
+    - filter: "model.layers.9.mlp."
+      value: 0.125
+    - filter: "model.layers.10.mlp."
+      value: 0.125
+    - filter: "model.layers.11.mlp."
+      value: 0.125
+    - filter: "model.layers.12.mlp."
+      value: 0.125
+    - filter: "model.layers.13.mlp."
+      value: 0.125
+    - filter: "model.layers.14.mlp."
+      value: 0.125
+    - filter: "model.layers.15.mlp."
+      value: 0.125
+    - filter: "model.layers.16.mlp."
+      value: 0.125
+    - filter: "model.layers.17.mlp."
+      value: 0.125
+    - filter: "model.layers.18.mlp."
+      value: 0.125
+    - value: 0.0

@@ -1,0 +1,57 @@
+merge_method: ties
+
+base_model: /mnt/d/Qwen_merge/models/Qwen2.5-1.5B-math
+
+dtype: float32
+out_dtype: float16
+tokenizer_source: base
+
+parameters:
+  normalize: true
+  int8_mask: true
+  lambda: 0.055
+
+models:
+  - model: /mnt/d/Qwen_merge/models/Qwen2.5-1.5B-coder
+    parameters:
+      density: 0.8
+      weight:
+        - filter: "model.layers.9.mlp."
+          value: 1.0
+        - filter: "model.layers.10.mlp."
+          value: 1.0
+        - filter: "model.layers.11.mlp."
+          value: 1.0
+        - filter: "model.layers.12.mlp."
+          value: 1.0
+        - filter: "model.layers.13.mlp."
+          value: 1.0
+        - filter: "model.layers.14.mlp."
+          value: 1.0
+        - filter: "model.layers.15.mlp."
+          value: 1.0
+        - filter: "model.layers.16.mlp."
+          value: 1.0
+        - filter: "model.layers.17.mlp."
+          value: 1.0
+        - filter: "model.layers.18.mlp."
+          value: 1.0
+        - filter: "model.layers.19.mlp."
+          value: 1.0
+        - filter: "model.layers.20.mlp."
+          value: 1.0
+        - filter: "model.layers.21.mlp."
+          value: 1.0
+        - filter: "model.layers.22.mlp."
+          value: 1.0
+        - filter: "model.layers.23.mlp."
+          value: 1.0
+        - filter: "model.layers.24.mlp."
+          value: 1.0
+        - filter: "model.layers.25.mlp."
+          value: 1.0
+        - filter: "model.layers.26.mlp."
+          value: 1.0
+        - filter: "model.layers.27.mlp."
+          value: 1.0
+        - value: 0.0

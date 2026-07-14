@@ -1,0 +1,4 @@
+﻿model,task,model_path,num_fewshot,max_new_toks,do_sample,temperature,top_p,"exact_match,strict-match","exact_match,flexible-extract","acc,none","acc_stderr,none","exact_match_stderr,flexible-extract","exact_match_stderr,strict-match","pass@1,create_test","pass@1_stderr,create_test",sample_len
+ta_coder_plus_math_mlp_lam_0p02,gsm8k,/mnt/d/Qwen_merge/merge_outputs/ta_coder_plus_math_mlp_lam_0p02,5,256,False,0.0,1.0,0.5413191811978771,0.5473843821076573,,,0.013710499070935137,0.0137253773263428,,,1319
+ta_coder_plus_math_mlp_lam_0p02,mmlu,/mnt/d/Qwen_merge/merge_outputs/ta_coder_plus_math_mlp_lam_0p02,5,256,False,0.0,1.0,,,0.5310497080188007,0.004048347229159782,,,,,14042
+ta_coder_plus_math_mlp_lam_0p02,humaneval,/mnt/d/Qwen_merge/merge_outputs/ta_coder_plus_math_mlp_lam_0p02,0,256,False,0.0,1.0,,,,,,,0.42073170731707316,0.03866773180939151,164
