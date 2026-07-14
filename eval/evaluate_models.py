@@ -53,7 +53,6 @@ CSV_TASK_METRIC_PRIORITY = {
 
 
 def setup_logger(log_path: Path) -> logging.Logger:
-    """配置同时输出到控制台和日志文件的记录器。"""
     logger = logging.getLogger("qwen_eval")
     logger.setLevel(logging.INFO)
     logger.handlers.clear()
@@ -117,7 +116,6 @@ def build_task_run(task_name: str) -> dict[str, Any]:
     task_config = TASK_EVAL_CONFIG[task_name]
     gen_kwargs = dict(BASE_GEN_KWARGS)
     gen_kwargs.update(task_config["gen_kwargs"])
-    # 强制统一生成长度，避免模型或后端的 generation_config 覆盖我们的设定。
     gen_kwargs["max_gen_toks"] = MAX_GEN_TOKS
     return {
         "num_fewshot": task_config["num_fewshot"],
@@ -126,7 +124,6 @@ def build_task_run(task_name: str) -> dict[str, Any]:
 
 
 def flatten_metrics(model_name: str, task_name: str, model_path: str, task_run: dict[str, Any], metrics: dict[str, Any]) -> dict[str, Any]:
-    """把每个模型在每个任务上的结果整理成一行，便于写入 CSV。"""
     row: dict[str, Any] = {
         "model": model_name,
         "task": task_name,
@@ -178,7 +175,6 @@ def main() -> int:
     import torch
     from lm_eval import evaluator
 
-    # 默认把 CSV 和日志放到 JSON 输出的同目录，便于一次性归档所有结果。
     csv_output = args.csv_output or args.output.with_suffix(".csv")
     log_file = args.log_file or args.output.with_suffix(".log")
     logger = setup_logger(log_file)
@@ -191,7 +187,7 @@ def main() -> int:
         "math": args.math_model or defaults["math"],
     }
 
-    # 如果用户要求扫描目录，添加任意命名的子目录为可评估模型（以子目录名作为模型标识）。
+    # 添加任意命名的子目录为可评估模型（以子目录名作为模型标识）。
     models_dir = args.models_dir or (repo_root / "models")
     if args.scan:
         if not models_dir.exists():
@@ -213,7 +209,6 @@ def main() -> int:
         selected_model_names = list(model_paths.keys())
     else:
         selected_model_names = args.models
-        # 验证用户提供的名称存在于发现的路径集合中
         missing = [n for n in selected_model_names if n not in model_paths]
         if missing:
             raise ValueError(f"Requested model names not found: {missing}. Available: {list(model_paths.keys())}")
@@ -240,7 +235,6 @@ def main() -> int:
         "models": {},
     }
 
-    # 这里用“行”来组织 CSV，最终每个模型-任务组合一行，便于后处理和对比。
     csv_rows: list[dict[str, Any]] = []
 
     for model_name, model_path in selected_model_paths.items():
@@ -307,7 +301,6 @@ def main() -> int:
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
-    # CSV 采用宽表输出，每行保留公共字段和该任务的指标，便于 Excel / pandas 直接读取。
     metric_keys: list[str] = []
     seen_metrics: set[str] = set()
     for task_name in selected_tasks:
