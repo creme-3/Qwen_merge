@@ -74,7 +74,7 @@ filter: "mlp."
 | `outputs/merge_results_summary.csv` | 当前实验结果的精简汇总表。 |
 | `outputs/merge_experiment_report.md` | 本实验报告。 |
 
-需要注意的是，原始模型权重目录 `models/` 和合并模型输出目录 `merge_outputs/` 不随仓库提交；复现实验时需按照 `ENVIRONMENT_SETUP.md` 在本地准备原始模型，并由合并脚本重新生成 `merge_outputs/`。
+原始模型权重目录 `models/` 和合并模型输出目录 `merge_outputs/` 不随仓库提交；复现实验时需按照 `ENVIRONMENT_SETUP.md` 在本地准备原始模型，并由合并脚本重新生成 `merge_outputs/`。
 
 ### 3.3 合并工具与输出格式
 
@@ -138,6 +138,11 @@ score_3task = 3.0000
 | math | 0.7407 | 0.4375 | 0.3110 | 2.0118 | 2.7296 | 数学最强，但代码较弱 |
 | coder | 0.5792 | 0.5374 | 0.4024 | 2.0013 | 2.8830 | 代码最强，但数学弱于 base 与 math |
 
+![Baseline performance](figures/baseline_performance.png)
+
+图 1 展示了三个基线模型在三项任务上的互补关系：`math` 在 GSM8K 上最强，`coder` 在 HumanEval 上最强，而 `base` 在 MMLU 上明显更强。
+
+
 基线结果清楚呈现了三者能力分布：
 
 - `math` 在 GSM8K 上最强。
@@ -182,6 +187,11 @@ coder + math/mlp 即 θ_merge,mlp = θ_coder,mlp + λ·(θ_math,mlp - θ_coder,m
 | `ta_coder_plus_math_mlp_lam_0p02` | 0.5474 | 0.5310 | 0.4207 | 2.0000 | 2.8712 |
 | `ta_coder_plus_math_mlp_lam_0p05` | 0.4610 | 0.5028 | 0.3354 | 1.6333 | 2.4582 |
 
+![Task Arithmetic lambda sweep](figures/task_arithmetic_lambda_sweep.png)
+
+图 2 展示了 `math + coder/mlp` 方向的 λ 扫描结果：当 λ 增大到 `0.05` 时，HumanEval 明显提升；继续增大 λ 后，GSM8K 与 `core_score` 开始下降。
+
+
 结论：
 
 - `math + coder/mlp` 在较小 λ 下可以保留 GSM8K，同时提升 HumanEval。
@@ -208,6 +218,11 @@ a. 在 `math + coder/mlp, λ=0.05` 基础上做分层消融：
 | `ta_math_plus_coder_mlp_exclude_layers_0_8_lam_0p05` | 0.7172 | 0.4300 | 0.3720 | 2.1384 | 2.8438 |
 | `ta_math_plus_coder_mlp_exclude_layers_9_18_lam_0p05` | 0.7202 | 0.4375 | 0.2805 | 1.8973 | 2.6151 |
 | `ta_math_plus_coder_mlp_exclude_layers_19_27_lam_0p05` | 0.7233 | 0.4323 | 0.3293 | 2.0333 | 2.7425 |
+
+![Layer ablation](figures/layer_ablation.png)
+
+图 3 比较了完整 MLP 合并与三组分层消融结果：去掉 9-18 层时，HumanEval 与 `core_score` 下降最明显，说明中间层是后续层选择实验的关键范围。
+
 
 结论：
 
@@ -246,6 +261,11 @@ math + coder/mlp, exclude_layers_0_8, λ=0.05
 | `ties_math_plus_coder_mlp_exclude_layers_0_8_lam_0p05_dens_0p7` | 0.7127 | 0.4304 | 0.3780 | 2.1476 | 2.8537 |
 | `ties_math_plus_coder_mlp_exclude_layers_0_8_lam_0p05_dens_0p8` | 0.7157 | 0.4297 | 0.3780 | 2.1524 | 2.8574 |
 | `ties_math_plus_coder_mlp_exclude_layers_0_8_lam_0p05_dens_0p9` | 0.7149 | 0.4305 | 0.3720 | 2.1348 | 2.8411 |
+
+![TIES density sweep](figures/ties_density_sweep.png)
+
+图 4 展示了 `exclude_layers_0_8, λ=0.05` 设置下的 TIES density 扫描结果：`density=0.6~0.8` 在 HumanEval 与 `core_score` 上形成较好折中，因此后续以 `density=0.8` 作为进一步搜索点。
+
 
 从而将 `dens = 0.8` 作为后续小范围搜索的初步折中配置。
 
@@ -299,6 +319,10 @@ math -> coder, mlp layers 9-18
 | `slerp_math_to_coder_mlp_layers_9_18_t_0p125` | 0.7134 | 0.4309 | 0.3902 | 2.1816 | 2.8885 |
 | `slerp_math_to_coder_mlp_layers_9_18_t_0p15` | 0.7127 | 0.4303 | 0.3780 | 2.1476 | 2.8535 |
 
+![SLERP t sweep](figures/slerp_t_sweep.png)
+
+图 5 展示了 MLP 9-18 层上的 SLERP `t` 扫描结果：较小的 `t` 更有利于保留 GSM8K，较大的 `t` 能提升 HumanEval，整体折中在 `t=0.10~0.125` 附近趋于稳定。
+
 SLERP 的趋势与 TIES 类似：
 
 - 小 `t` 更保守，GSM8K 保留更好。
@@ -313,6 +337,11 @@ SLERP 的趋势与 TIES 类似：
 | Task Arithmetic | `ta_math_plus_coder_mlp_exclude_layers_0_8_lam_0p05` | 0.7172 | 0.4300 | 0.3720 | 2.1384 | 2.8438 |
 | TIES | `ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p85` | 0.7293 | 0.4310 | 0.3902 | 2.2068 | 2.9139 |
 | SLERP | `slerp_math_to_coder_mlp_layers_9_18_t_0p125` | 0.7134 | 0.4309 | 0.3902 | 2.1816 | 2.8885 |
+
+![Method trade-off scatter](figures/method_tradeoff_scatter.png)
+
+图 6 将所有保留实验绘制到 GSM8K-HumanEval 平面上：虚线表示 `base` 的对应分数，点越靠右说明数学能力越强，越靠上说明代码能力越强。
+
 
 从当前数据看：
 
