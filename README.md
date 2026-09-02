@@ -1,8 +1,15 @@
-# Qwen2.5-1.5B MLP 模型合并实验
+# Qwen2.5-1.5B 专家模型合并
 
-本仓库用于复现 Qwen2.5-1.5B `math` 与 `coder` 专家模型的 MLP 子空间合并实验。实验目标不是让合并模型在所有任务上全面超过 `base`，而是验证能否在数学推理能力和代码生成能力之间取得更好的折中。
+这是一个面向数学推理与代码生成的模型合并实验项目。项目研究 Qwen2.5-1.5B 的 `base`、`math` 和 `coder` checkpoint，在模型配置存在差异的情况下，如何通过 MLP 子空间的局部合并，构造一个更均衡的数学与代码模型。
 
-## 1. 实验结论
+## 项目亮点
+
+- **结构感知的合并策略**：发现 `base`、`math`、`coder` 的上下文配置并不完全一致，因此避免高风险的全参数合并，优先在 MLP 子空间中实验。
+- **系统比较三种方法**：统一比较 Task Arithmetic、TIES 和层选择式 SLERP。
+- **定位有效迁移区域**：通过层消融和参数扫描发现 MLP `9-18` 层是代码能力注入的关键范围。
+- **结果可解释**：以 GSM8K 和 HumanEval 作为核心目标，以 MMLU 观察通用能力损失，明确展示能力迁移与取舍。
+
+## 核心结果
 
 当前实验的主要结论如下：
 
@@ -15,25 +22,33 @@
   - MMLU：`acc, none`
   - HumanEval：`pass@1, create_test`
 
-完整实验分析见：
+最佳配置为：
 
 ```text
-outputs/merge_experiment_report.md
+math + coder / MLP layers 9-18
+method=TIES, lambda=0.05, density=0.85
 ```
 
-精简结果表见：
+| 模型/配置 | GSM8K | MMLU | HumanEval | core_score | score_3task |
+|---|---:|---:|---:|---:|---:|
+| `base` | 0.6300 | 0.6095 | 0.3720 | 2.0000 | 3.0000 |
+| `math` | 0.7407 | 0.4375 | 0.3110 | 2.0118 | 2.7296 |
+| `coder` | 0.5792 | 0.5374 | 0.4024 | 2.0013 | 2.8830 |
+| Task Arithmetic | 0.7172 | 0.4300 | 0.3720 | 2.1384 | 2.8438 |
+| **TIES（最佳代表）** | **0.7293** | 0.4310 | **0.3902** | **2.2068** | **2.9139** |
+| SLERP | 0.7134 | 0.4309 | 0.3902 | 2.1816 | 2.8885 |
 
-```text
-outputs/merge_results_summary.csv
-```
+最佳模型不是全面超过 `base` 的模型，而是以 `math` 为主体、注入 `coder` MLP 能力的折中模型。相对 `math`，GSM8K 基本保持，同时 HumanEval 从 `0.3110` 提升到 `0.3902`；MMLU 仍明显低于 `base`。
+
+![方法权衡结果](outputs/figures/method_tradeoff_scatter.png)
+
+更多图表见 [outputs/figures/](outputs/figures/)，完整实验分析见 [outputs/merge_experiment_report.md](outputs/merge_experiment_report.md)，精简结果表见 [outputs/merge_results_summary.csv](outputs/merge_results_summary.csv)。
+
+HumanEval 只有 164 个样本，且代码执行指标在不同平台上的支持情况可能不同，因此小幅差异不应过度解读。报告中的结论主要关注明显的能力变化和整体趋势。
 
 ## 2. 环境配置
 
-环境配置说明见：
-
-```text
-ENVIRONMENT_SETUP.md
-```
+环境配置说明见 [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md)。
 
 建议使用两个 Conda 环境：
 
@@ -48,6 +63,17 @@ ENVIRONMENT_SETUP.md
 .
 ├── README.md
 ├── ENVIRONMENT_SETUP.md
+├── PROJECT_ROADMAP.md
+├── PROJECT_SUMMARY.md
+├── configs/
+│   └── paths.example.yml
+├── scripts/
+│   ├── run_best_merge.py
+│   ├── run_best_eval.py
+│   ├── reproduce_best.py
+│   ├── plot_results.py
+│   ├── check_results.py
+│   └── check_project.py
 ├── eval/
 │   ├── evaluate_models.py
 │   ├── normalized_score.py
@@ -185,6 +211,47 @@ conda activate model_merge
 python eval/normalized_score.py --results-dir eval_results
 ```
 
+也可以保存归一化结果：
+
+```bash
+python eval/normalized_score.py --results-dir eval_results --output outputs/normalized_results.csv
+```
+
+从汇总 CSV 重建图表：
+
+```bash
+python scripts/plot_results.py
+```
+
+运行不需要模型权重的项目检查：
+
+```bash
+python scripts/check_project.py
+python scripts/check_results.py
+```
+
+有本地模型权重后，可以对比代表模型的实际生成：
+
+```bash
+python scripts/infer_compare.py \
+  --model base=models/Qwen2.5-1.5B-base \
+  --model math=models/Qwen2.5-1.5B-math \
+  --model merged=merge_outputs/ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p85 \
+  --output outputs/inference_comparison.md
+```
+
+重复测评入口：
+
+```bash
+python scripts/repeat_stability.py --config configs/paths.yml --seeds 42 43 44 --offline
+```
+
+PDF 导出需要本机安装 Pandoc 和 LaTeX：
+
+```bash
+python scripts/export_report_pdf.py
+```
+
 归一化分数定义：
 
 ```text
@@ -202,4 +269,8 @@ score_3task = core_score + MMLU / base_MMLU
 - `merge_outputs/`：合并模型输出，可由脚本重新生成。
 - `eval_results/*.json`、`eval_results/*.log`：测评原始 JSON 与日志，可重新生成。
 - `__pycache__/`、`.tmp_recipes/`、`.vscode/`：缓存或本地临时文件。
+
+## 项目升级路线
+
+后续工程化任务和完成状态见 [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md)。
 

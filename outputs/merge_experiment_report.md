@@ -237,8 +237,8 @@ b. 在 `math + coder/mlp, exclude 0-8 layers` 基础上做分层权重：
 | 配置 | GSM8K | MMLU | HumanEval | core_score | score_3task |
 |---|---:|---:|---:|---:|---:|
 | `ta_math_plus_coder_mlp_exclude_layers_0_8_lam_0p05` | 0.7172 | 0.4300 | 0.3720 | 2.1384 | 2.8438 |
-| `ta_math_plus_coder_mlp_weight_0_8_0p0_9_27_1p1_lam_0p05` | 0.7172 | 0.4300 | 0.3720 | 2.1384 | 2.8438 |
-| `ta_math_plus_coder_mlp_weight_0_8_0p0_9_27_1p2_lam_0p05` | 0.7165 | 0.4303 | 0.3720 | 2.1372 | 2.8431 |
+| `ta_math_plus_coder_mlp_weights_0_8_0p0_9_27_1p1_lam_0p05` | 0.7172 | 0.4300 | 0.3720 | 2.1384 | 2.8438 |
+| `ta_math_plus_coder_mlp_weights_0_8_0p0_9_27_1p2_lam_0p05` | 0.7165 | 0.4303 | 0.3720 | 2.1372 | 2.8431 |
 
 分层权重对结果的影响并不大，因此我们将 `math + coder/mlp, exclude 0-8 layers, λ=0.05` 作为 Task Arithmetic 的代表配置。
 

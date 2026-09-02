@@ -1,0 +1,9 @@
+# Python 3.10+
+mergekit
+transformers
+accelerate
+safetensors
+sentencepiece
+protobuf
+pyyaml
+# Install a PyTorch build matching the local CUDA driver separately.

@@ -1,0 +1,14 @@
+# Copy this file to configs/paths.yml and adjust paths for the local machine.
+# Paths are relative to the repository root unless absolute paths are used.
+models_dir: models
+merge_outputs_dir: merge_outputs
+eval_results_dir: eval_results
+recipes_dir: merge/experiments
+figures_dir: outputs/figures
+
+models:
+  base: models/Qwen2.5-1.5B-base
+  math: models/Qwen2.5-1.5B-math
+  coder: models/Qwen2.5-1.5B-coder
+
+best_model: ties_math_plus_coder_mlp_layers_9_18_lam_0p05_dens_0p85

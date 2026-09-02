@@ -6,6 +6,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from common import build_filter_weight_lines, parse_layer_ranges as parse_common_layer_ranges
+
 
 DEFAULT_LAMBDAS = ["0.005", "0.01", "0.02", "0.03", "0.05", "0.075"]
 DEFAULT_DENSITIES = ["0.2", "0.4", "0.6", "0.8"]
@@ -62,10 +64,7 @@ def build_recipe(
     int8_mask: bool,
     weighted_filters: list[tuple[str, float]],
 ) -> str:
-    weight_lines = "\n".join(
-        f'        - filter: "{filter_pattern}"\n          value: {weight}'
-        for filter_pattern, weight in weighted_filters
-    )
+    weight_lines = build_filter_weight_lines(weighted_filters, indent=8)
     density_line = f"      density: {density_value}\n" if method == "ties" else ""
     int8_mask_line = f"  int8_mask: {str(int8_mask).lower()}\n" if method == "ties" else ""
     return f"""merge_method: {method}
@@ -90,29 +89,7 @@ models:
 
 
 def parse_layer_ranges(layer_ranges: list[str] | None) -> list[int] | None:
-    if not layer_ranges:
-        return None
-
-    layers: set[int] = set()
-    for layer_range in layer_ranges:
-        for part in layer_range.split(","):
-            part = part.strip()
-            if not part:
-                continue
-            if "-" in part:
-                start_text, end_text = part.split("-", maxsplit=1)
-                start = int(start_text)
-                end = int(end_text)
-                if end < start:
-                    raise ValueError(f"Invalid layer range: {part}")
-                layers.update(range(start, end + 1))
-            else:
-                layers.add(int(part))
-
-    invalid = [layer for layer in layers if layer < 0 or layer > 27]
-    if invalid:
-        raise ValueError(f"Layer ids must be in [0, 27], got: {invalid}")
-    return sorted(layers)
+    return parse_common_layer_ranges(layer_ranges)
 
 
 def resolve_layers(include_ranges: list[str] | None, exclude_ranges: list[str] | None) -> list[int] | None:

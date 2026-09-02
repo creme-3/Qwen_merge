@@ -165,9 +165,34 @@ core_score = GSM8K / base_GSM8K + HumanEval / base_HumanEval
 score_3task = core_score + MMLU / base_MMLU
 ```
 
-## 5. 常见问题
+## 5. 配置与一键入口
 
-### 5.1 Hugging Face 网络报错
+复制路径配置模板并按本机目录修改：
+
+```bash
+cp configs/paths.example.yml configs/paths.yml
+```
+
+最佳配置的一键入口位于 `scripts/`：
+
+```bash
+python scripts/run_best_merge.py --config configs/paths.yml
+python scripts/run_best_eval.py --config configs/paths.yml --offline
+python scripts/reproduce_best.py --config configs/paths.yml --limit 10 --offline
+```
+
+Linux/WSL 也可以使用对应的 `.sh` 包装脚本。完整评测前请去掉 `--limit`；合并和评测仍建议分别在 `merge` 与 `model_merge` 环境中运行。
+
+项目静态检查不需要模型权重：
+
+```bash
+python scripts/check_project.py
+python scripts/check_results.py
+```
+
+## 6. 常见问题
+
+### 6.1 Hugging Face 网络报错
 
 如果看到类似 `Network is unreachable`，但日志显示使用 cached dataset，一般不会影响已有缓存的完整评测。建议：
 
@@ -175,7 +200,7 @@ score_3task = core_score + MMLU / base_MMLU
 python eval/evaluate_models.py ... --offline
 ```
 
-### 5.2 CUDA 显存不足
+### 6.2 CUDA 显存不足
 
 合并和测评均建议单进程运行。运行前检查：
 
@@ -185,7 +210,7 @@ nvidia-smi
 
 如果显存残留异常，优先关闭其他 Python 进程；必要时重启 WSL 或重启机器。
 
-### 5.3 tokenizer 警告
+### 6.3 tokenizer 警告
 
 如果偶发 tokenizer 网络或 regex 警告，先确认模型目录中的 tokenizer 文件完整，并尽量使用稳定网络或离线缓存。该警告通常与 Hugging Face 访问状态有关，不一定代表模型权重损坏。
 

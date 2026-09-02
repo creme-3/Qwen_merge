@@ -1,0 +1,12 @@
+# Python 3.10+
+torch
+transformers
+accelerate
+datasets
+evaluate
+sentencepiece
+protobuf
+safetensors
+lm-eval[api]
+matplotlib
+# HumanEval code execution may require platform-specific support.

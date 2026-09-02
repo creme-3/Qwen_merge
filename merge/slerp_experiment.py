@@ -6,6 +6,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from common import build_filter_weight_lines, parse_layer_ranges
+
 
 MODEL_DIRS = {"math": "Qwen2.5-1.5B-math", "coder": "Qwen2.5-1.5B-coder"}
 
@@ -21,30 +23,13 @@ def select_mergekit_command() -> str:
     raise FileNotFoundError("mergekit-yaml not found in PATH")
 
 
-def parse_layers(layer_ranges: list[str]) -> list[int]:
-    layers: set[int] = set()
-    for layer_range in layer_ranges:
-        for part in layer_range.split(","):
-            part = part.strip()
-            if "-" in part:
-                start_text, end_text = part.split("-", maxsplit=1)
-                layers.update(range(int(start_text), int(end_text) + 1))
-            elif part:
-                layers.add(int(part))
-    invalid = [layer for layer in layers if layer < 0 or layer > 27]
-    if invalid:
-        raise ValueError(f"Layer ids must be in [0, 27], got: {invalid}")
-    return sorted(layers)
-
-
 def format_value(value: str) -> str:
     return value.replace(".", "p").replace("-", "m")
 
 
 def build_recipe(start_model: Path, end_model: Path, layers: list[int], t_value: str) -> str:
-    t_lines = "\n".join(
-        f'    - filter: "model.layers.{layer}.mlp."\n      value: {t_value}'
-        for layer in layers
+    t_lines = build_filter_weight_lines(
+        [(f"model.layers.{layer}.mlp.", t_value) for layer in layers], indent=4
     )
     return f"""slices:
   - sources:
@@ -71,13 +56,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Run layer-selective SLERP experiments.")
     parser.add_argument("--start", choices=sorted(MODEL_DIRS), default="math")
     parser.add_argument("--end", choices=sorted(MODEL_DIRS), default="coder")
-    parser.add_argument("--layers", action="append", default=None)
-    parser.add_argument("--t", dest="t_value", default="0.05")
-    parser.add_argument("--t-values", nargs="+", default=None)
-    parser.add_argument("--write-only", action="store_true")
-    parser.add_argument("--print-only", action="store_true")
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--cpu-threads", type=int, default=None)
+    parser.add_argument("--layers", action="append", default=None, help="Layer ids/ranges, for example 9-18 or 0-7,20-27")
+    parser.add_argument("--t", dest="t_value", default="0.05", help="SLERP interpolation value for a single run")
+    parser.add_argument("--t-values", nargs="+", default=None, help="SLERP interpolation sweep values")
+    parser.add_argument("--write-only", action="store_true", help="Write recipes without running mergekit")
+    parser.add_argument("--print-only", action="store_true", help="Print the recipe without writing files")
+    parser.add_argument("--dry-run", action="store_true", help="Write recipes and print commands without running mergekit")
+    parser.add_argument("--cpu-threads", type=int, default=None, help="CPU threads for mergekit")
     args = parser.parse_args()
 
     if args.start == args.end:
@@ -88,7 +73,7 @@ def main() -> int:
     end_model = root / "models" / MODEL_DIRS[args.end]
     recipes_dir = root / "merge" / "experiments"
     outputs_dir = root / "merge_outputs"
-    layers = parse_layers(args.layers or ["9-18"])
+    layers = parse_layer_ranges(args.layers or ["9-18"]) or []
     t_values = args.t_values or [args.t_value]
 
     for t_value in t_values:

@@ -41,7 +41,10 @@ def collect_scores(results_dir: Path) -> dict[str, dict[str, float]]:
             value = metric_value(row)
             if not model or not task or value is None:
                 continue
-            scores.setdefault(model, {})[task] = value
+            previous = scores.setdefault(model, {}).get(task)
+            if previous is not None and abs(previous - value) > 1e-9:
+                raise ValueError(f"Conflicting values for {model}/{task}: {previous} vs {value} in {csv_path}")
+            scores[model][task] = value
     return scores
 
 
@@ -63,6 +66,7 @@ def normalized_total(model_scores: dict[str, float], base_scores: dict[str, floa
 def main() -> int:
     parser = argparse.ArgumentParser(description="Summarize normalized GSM8K/MMLU/HumanEval scores against the base model.")
     parser.add_argument("--results-dir", type=Path, default=Path("eval_results"), help="Directory containing evaluation CSV files")
+    parser.add_argument("--output", type=Path, default=None, help="Optional CSV file for the normalized summary")
     args = parser.parse_args()
 
     scores = collect_scores(args.results_dir)
@@ -84,12 +88,13 @@ def main() -> int:
         )
 
     rows.sort(key=lambda row: row["score"], reverse=True)
-    print("model,normalized_total,gsm8k,mmlu,humaneval")
+    lines = ["model,normalized_total,gsm8k,mmlu,humaneval"]
     for row in rows:
-        print(
-            f"{row['model']},{row['score']:.6f},"
-            f"{row['gsm8k']:.6f},{row['mmlu']:.6f},{row['humaneval']:.6f}"
-        )
+        lines.append(f"{row['model']},{row['score']:.6f},{row['gsm8k']:.6f},{row['mmlu']:.6f},{row['humaneval']:.6f}")
+    print("\n".join(lines))
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     return 0
 
